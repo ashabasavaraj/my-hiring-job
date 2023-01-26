@@ -17,7 +17,7 @@ pipeline {
         }
          stage('Tomcat Deploy') {
             steps {
-            tomcatDeploy('172.31.28.5', 'jenkins-to-tomcat','ec2-user')
+            tomcatDeploy('172.31.28.5', 'tomcat-creds','ec2-user')
             }
         }
         
