@@ -2,31 +2,33 @@ pipeline {
     agent any
 
     stages {
-        stage('git checkout') {
-            steps {
-            git branch: 'main', credentialsId: 'git_cred', url: 'https://github.com/ashabasavaraj/my-hiring-job'
-            }
-        }
         stage('maven package') {
+            when {
+            branch 'develop'
+            }
+            
             steps {
             sh "mvn clean package"    
             
             }
         }
-         stage('Tomcat Deploy') {
+         stage('Tomcat Deploy-dev') {
+             when {
+            branch 'develop'
+            }  
             steps {
-            
-            sshagent(['tomcat-creds']) {
-    // some block
-    sh "echo iam doing replay demo"
-    sh "echo iam asha"          
-     sh "scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/CI-CD-deploy/target/*.war ec2-user@172.31.28.5:/opt/tomcat9/webapps/"
-        
-     sh " ssh ec2-user@172.31.28.5 /opt/tomcat9/bin/shutdown.sh "   
-     sh " ssh ec2-user@172.31.28.5 /opt/tomcat9/bin/startup.sh " 
-               }
+             echo "deploying to dev"
             }
-        }
+         }
+            stage('Tomcat Deploy-prod') {
+             when {
+            branch 'main'
+            }  
+            steps {
+             echo "deploying to production"
+            }
+         }  
+       }
         
     }
-}
+
