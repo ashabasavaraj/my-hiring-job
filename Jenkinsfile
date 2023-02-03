@@ -3,32 +3,33 @@ pipeline {
 
     stages {
         stage('maven package') {
-            when {
-            branch 'develop'
-            }
-            
+           
             steps {
             sh "mvn clean package"    
             
             }
         }
-         stage('Tomcat Deploy-dev') {
-             when {
-            branch 'develop'
-            }  
+         stage('Docker Build') {
+             
             steps {
-             echo "deploying to dev"
+             docker build -t asharaghu/hiring:0.0.2 .
             }
          }
-            stage('Tomcat Deploy-prod') {
-             when {
-            branch 'main'
-            }  
+            stage('Docker Push') {
             steps {
-             echo "deploying to production"
+             withCredentials([string(credentialsId: 'docker-hub', variable: 'hubpwd'), string(credentialsId: 'docker-hub', variable: 'hubpwd')]) {
+                 sh "docker login -u asharaghu -p ${hubpwd}"
+                 sh "docker push asharaghu/hiring:0.0.2"
+               }
             }
-         }  
-       }
-        
+         }
+        stage('Docker Deploy') {
+            steps {
+                sshagent(['docker-host']) {
+                sh 'ssh -o StrictHostKeyChecking=no ec2-user@172.31.30.215 docker run -p -d 8080:8080 --name hiring asharaghu/hiring:0.0.2
+                }
+            }
+        }
     }
+}
 
