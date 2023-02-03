@@ -12,7 +12,7 @@ pipeline {
          stage('Docker Build') {
              
             steps {
-             docker build -t asharaghu/hiring:0.0.2 .
+             sh " docker build -t asharaghu/hiring:0.0.2 ."
             }
          }
             stage('Docker Push') {
